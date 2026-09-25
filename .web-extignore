@@ -1,0 +1,8 @@
+node_modules/
+artifacts/
+tests/
+scripts/
+*.test.js
+package.json
+package-lock.json
+.web-extignore

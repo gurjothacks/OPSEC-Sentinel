@@ -1,0 +1,40 @@
+# Node
+node_modules/
+dist/
+build/
+coverage/
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Editors
+.vscode/
+.idea/
+
+# Firefox / web-ext local artifacts
+artifacts/
+web-ext-artifacts/
+.profile*/
+firefox-profile*/
+
+# Local dev evidence (contains captured real state during dev)
+evidence/
+
+# Archives
+*.zip
+*.xpi
