@@ -1,0 +1,19 @@
+{
+  "name": "opsec-sentinel",
+  "version": "1.0.0",
+  "description": "Firefox toolbar network identity monitor (OPSEC Sentinel). Privacy-focused, local-only, no telemetry.",
+  "license": "MIT",
+  "repository": "https://github.com/USER/opsec-sentinel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "icons": "node scripts/make-icons.mjs",
+    "test": "node --test tests/*.test.js",
+    "lint": "web-ext lint --source-dir .",
+    "build": "npm run icons && web-ext build --source-dir . --artifacts-dir artifacts --overwrite-dest",
+    "start": "web-ext run --source-dir . --firefox=firefox --no-input"
+  },
+  "devDependencies": {
+    "web-ext": "^8.10.0"
+  }
+}

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'">
+<title>OPSEC Sentinel</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="app-header">
+    <span id="app-glyph" class="glyph" aria-hidden="true"></span>
+    <h1>OPSEC Sentinel</h1>
+  </header>
+
+  <main id="content" class="content">
+  <button id="status-row" class="status-row" data-state="unknown" disabled>
+    <span id="status-dot" class="dot"></span>
+    <span class="status-text">
+      <span id="status-title" class="status-title">Network identity unavailable</span>
+      <span id="status-sub" class="status-sub">Checking...</span>
+    </span>
+  </button>
+
+  <section id="change-banner" class="notice notice-red hidden">
+    <div class="notice-title">Network identity changed</div>
+    <div class="notice-sub">
+      <div class="meta-row"><span>Previous</span><b id="chg-prev">-</b></div>
+      <div class="meta-row"><span>Current</span><b id="chg-curr">-</b></div>
+    </div>
+    <div id="geo-change-note" class="notice-sub hidden"></div>
+  </section>
+
+  <section id="mismatch-banner" class="notice hidden">
+    <div class="notice-title">Network identity mismatch</div>
+    <div id="mismatch-sub" class="notice-sub"></div>
+  </section>
+
+  <section id="stale-banner" class="notice hidden">
+    <div class="notice-title">Data may be stale</div>
+    <div id="stale-sub" class="notice-sub">Identity could not be re-verified.</div>
+  </section>
+
+  <section class="group">
+    <div class="group-label">Public IP</div>
+    <div class="ip-focus">
+      <span id="ip-primary" class="ip-primary">-</span>
+      <button id="btn-copy" class="copy-btn" title="Copy IP" aria-label="Copy IP to clipboard" disabled>Copy</button>
+    </div>
+    <div id="ip-geo" class="ip-geo">-</div>
+  </section>
+
+  <section class="group">
+    <div class="group-label">Network</div>
+    <div class="meta">
+      <div class="meta-row"><span>ASN</span><b id="id-asn">-</b></div>
+      <div class="meta-row"><span>Organization</span><b id="id-org">-</b></div>
+      <div class="meta-row"><span>Type</span><b id="id-nettype">-</b></div>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-label">Checks</div>
+    <div class="meta">
+      <div class="meta-row check-row"><span>IPv4</span><b id="chk-ipv4" class="chk" title="Whether a public IPv4 address was observed">-</b></div>
+      <div class="meta-row check-row"><span>IPv6</span><b id="chk-ipv6" class="chk" title="Whether a public IPv6 address was observed">-</b></div>
+      <div class="meta-row check-row"><span>WebRTC</span><b id="chk-webrtc" class="chk" title="Whether WebRTC exposed an unexpected public address during the available test">-</b></div>
+      <div class="meta-row check-row"><span>Consistency</span><b id="chk-identity" class="chk" title="Whether the current public network identity matches the previous observation">-</b></div>
+    </div>
+  </section>
+
+  <button id="btn-details" class="disclosure">View details <span aria-hidden="true">→</span></button>
+
+  <section id="details" class="group hidden">
+    <div class="group-label">Public identity</div>
+    <div class="meta">
+      <div class="meta-row"><span>IPv4</span><b id="d-ipv4">-</b></div>
+      <div class="meta-row"><span>IPv6</span><b id="d-ipv6">-</b></div>
+    </div>
+
+    <div class="group-label">Location</div>
+    <div class="meta">
+      <div class="meta-row"><span>Country</span><b id="d-country">-</b></div>
+      <div class="meta-row"><span>Country code</span><b id="d-countrycode">-</b></div>
+      <div class="meta-row"><span>Region</span><b id="d-region">-</b></div>
+      <div class="meta-row"><span>City</span><b id="d-city">-</b></div>
+      <div class="meta-row"><span>Timezone</span><b id="d-timezone">-</b></div>
+    </div>
+
+    <div class="group-label">Network</div>
+    <div class="meta">
+      <div class="meta-row"><span>ASN</span><b id="d-asn">-</b></div>
+      <div class="meta-row"><span>Organization</span><b id="d-org">-</b></div>
+      <div class="meta-row"><span>Network type</span><b id="d-nettype">-</b></div>
+      <div class="meta-row"><span>Data provider</span><b id="d-provider">-</b></div>
+    </div>
+
+    <div class="group-label">WebRTC</div>
+    <div class="meta">
+      <div class="meta-row"><span>Status</span><b id="d-webrtc-status">-</b></div>
+      <div class="meta-row"><span>Test result</span><b id="d-webrtc-result">-</b></div>
+    </div>
+    <div id="d-webrtc-expl" class="note hidden"></div>
+    <div id="d-webrtc-limit" class="note hidden"></div>
+
+    <div class="group-label">Checks</div>
+    <div id="routing-detail" class="routing"></div>
+
+    <div class="group-label">Identity consistency</div>
+    <div class="meta">
+      <div class="meta-row"><span>Status</span><b id="d-cons-status">-</b></div>
+      <div class="meta-row"><span>Previous IPv4</span><b id="d-cons-prev4">-</b></div>
+      <div class="meta-row"><span>Current IPv4</span><b id="d-cons-curr4">-</b></div>
+      <div class="meta-row"><span>Previous IPv6</span><b id="d-cons-prev6">-</b></div>
+      <div class="meta-row"><span>Current IPv6</span><b id="d-cons-curr6">-</b></div>
+      <div class="meta-row"><span>Compared at</span><b id="d-cons-time">-</b></div>
+    </div>
+    <div id="d-cons-expl" class="note">Current public network identity matches the previous observation.</div>
+
+    <div class="group-label">ID history</div>
+    <div id="history-note" class="note hidden">History storage disabled in settings.</div>
+    <div class="meta"><div id="history-body"></div></div>
+
+    <div class="group-label">Data</div>
+    <div class="meta">
+      <div class="meta-row"><span>Last verified</span><b id="d-verified">-</b></div>
+      <div class="meta-row"><span>Data age</span><b id="d-age">-</b></div>
+    </div>
+    <div class="note">DNS leak status is not testable from inside a browser extension and is intentionally not shown as a pass/fail.</div>
+  </section>
+
+  <section id="settings" class="group hidden">
+    <div class="group-label">General</div>
+    <label class="field">Refresh interval (minutes, 1-60)
+      <input id="set-interval" type="number" min="1" max="60">
+    </label>
+
+    <div class="group-label">Privacy</div>
+    <label class="field checkbox"><input id="set-maskip" type="checkbox"> Mask IP in popup</label>
+    <label class="field checkbox"><input id="set-history" type="checkbox"> Store identity history</label>
+
+    <div class="group-label">Checks</div>
+    <label class="field checkbox"><input id="set-webrtc" type="checkbox"> WebRTC leak check</label>
+    <label class="field">Badge mode
+      <select id="set-badgemode">
+        <option value="ip">Short IP (62...)</option>
+        <option value="country">Country code (NL)</option>
+        <option value="ok">OK</option>
+      </select>
+    </label>
+    <label class="field">API endpoint override (advanced; ipapi.is-compatible, https or http://localhost)
+      <input id="set-api" type="text" placeholder="https://example.com/ (empty = default)" spellcheck="false" autocomplete="off">
+    </label>
+
+    <div class="group-label">Appearance</div>
+    <label class="field">Theme
+      <select id="set-appearance">
+        <option value="system">System</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+
+    <div class="group-label">About</div>
+    <div class="meta">
+      <div class="meta-row"><span>Version</span><b id="about-version">-</b></div>
+      <div class="meta-row"><span>Storage</span><b>Local only</b></div>
+    </div>
+
+    <button id="btn-save" class="btn primary">Save</button>
+    <div id="settings-status" class="note"></div>
+  </section>
+  </main>
+
+  <footer class="footer">
+    <button id="btn-refresh" class="btn">Refresh</button>
+    <button id="btn-settings" class="btn">Settings</button>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

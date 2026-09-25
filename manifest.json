@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "OPSEC Sentinel",
+  "version": "1.0.0",
+  "description": "Toolbar network identity monitor for Firefox.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "https://api.ipify.org/",
+    "https://api6.ipify.org/",
+    "https://api.ipapi.is/",
+    "https://ipinfo.io/",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "OPSEC Sentinel",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  },
+  "content_security_policy": "script-src 'self'; object-src 'none'; style-src 'self'; img-src 'self'; connect-src 'self' https: http://127.0.0.1:* http://localhost:*",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "opsec-sentinel@local",
+      "strict_min_version": "115.0"
+    }
+  }
+}
